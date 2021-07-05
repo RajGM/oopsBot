@@ -1,3 +1,7 @@
+//C++ file for Wallet
+//StarterCode file 
+//No need to change anything here
+
 #include "Wallet.h"
 #include <iostream>
 #include "CSVReader.h"

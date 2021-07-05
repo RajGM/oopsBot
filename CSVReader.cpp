@@ -1,7 +1,10 @@
+//C++ File for CSVReader
+//StarterCode file 
+//No need to change anything here
+
 #include "CSVReader.h"
 #include <iostream>
 #include <fstream>
-
 
 CSVReader::CSVReader()
 {

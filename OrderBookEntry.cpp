@@ -1,3 +1,7 @@
+//C++ file for OrderBookEntry
+//StarterCode file 
+//No need to change anything here
+
 #include "OrderBookEntry.h"
 
 OrderBookEntry::OrderBookEntry( double _price, 

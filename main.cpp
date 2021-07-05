@@ -4,6 +4,7 @@
 
 int main()
 {   
+    //start the MerkelMain
     MerkelMain app{};
     app.init();
     

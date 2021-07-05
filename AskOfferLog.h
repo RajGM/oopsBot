@@ -1,3 +1,6 @@
+//Header File for AskOfferLog Class
+//It will be used for storing logs of all trades passed to exchanges matching engine
+
 #pragma once
 
 #include<string>

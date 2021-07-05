@@ -1,3 +1,6 @@
+//Header File for SuccessTrade Class
+//It will be used for storing logs of all Successfull Trade over time 
+
 #pragma once
 
 #include<string>

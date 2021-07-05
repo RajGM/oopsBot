@@ -1,9 +1,13 @@
+//CPP file for Logger
+//All function are defined here that will be used to write log to txt files
+
 #include "Logger.h"
 
 Logger::Logger()
 {
 }
 
+//writeLogAssets_toFile will write contents of logAssetsVector into txt file called "logAssets.txt"
 void Logger::writeLogAssets_toFile(std::vector<LogAssets> logAssetsVector)
 {
     std::ofstream myfile;
@@ -19,6 +23,7 @@ void Logger::writeLogAssets_toFile(std::vector<LogAssets> logAssetsVector)
     std::cout << "COMPLETED writeLogAssets_toFile " << std::endl;
 }
 
+//writeSuccessTrade_toFile will write contents of allSuccessTradeVector into txt file called "allSuccessTrades.txt"
 void Logger::writeSuccessTrade_toFile(std::vector<SuccessTrade> allSuccessTradeVector)
 {
     std::ofstream myfile;
@@ -34,6 +39,7 @@ void Logger::writeSuccessTrade_toFile(std::vector<SuccessTrade> allSuccessTradeV
     std::cout << "COMPLETED writeSuccessTrade_toFile " << std::endl;
 }
 
+//writeAskOfferLog_toFile will write contents of allTradeLogVector into txt file called "allTradeLog.txt"
 void Logger::writeAskOfferLog_toFile(std::vector<AskOfferLog> allTradeLogVector)
 {
 

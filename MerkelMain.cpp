@@ -231,8 +231,8 @@ void MerkelMain::startBot()
 {
     Bot bot;
     bot.botInit();
-    //bot training
-
+    
+    //bot training for the first 6 time frames
     for (int i = 0; i < 6; i++)
     {
         for (std::string const &p : orderBook.getKnownProducts())
@@ -251,7 +251,7 @@ void MerkelMain::startBot()
         gotoNextTimeframe();
     }
 
-    //check if good enought to buy/sell
+    //bot trading for the rest of the time frames
     for (int i = 0; i < 10; i++)
     {
         for (std::string const &p : orderBook.getKnownProducts())
@@ -265,9 +265,9 @@ void MerkelMain::startBot()
 
             std::string botOrder = bot.checkIsOrder(pairName, OrderBook::getLowPrice(entries1), OrderBook::getHighPrice(entries2));
             
+            //if bot predicts to buy
             if (botOrder == "buy")
             {
-                //first currency
                 auto first_token = p.substr(0, p.find('/'));
 
                 if (wallet.currenciesMap.find(first_token) != wallet.currenciesMap.end())
@@ -278,7 +278,7 @@ void MerkelMain::startBot()
                     
                     if (bidState == -1.0)
                     {
-                        //   std::cout << "BAD INPUT" << std::endl;
+                        //   bad input
                     }
                     else if (bidState)
                     {
@@ -298,6 +298,7 @@ void MerkelMain::startBot()
             }
             else if (botOrder == "sell")
             {
+                //if bot predicts to sell
 
                 //auto second_token = p.substr(p.find('/')+1,p.length());
                 //std::cout<<"SECOND TOKEN TEST:"<<second_token<<std::endl;
@@ -314,7 +315,7 @@ void MerkelMain::startBot()
                     
                     if (askState == -1.0)
                     {
-                        //std::cout << "BAD INPUT" << std::endl;
+                        //bad input 
                     }
                     else if (askState)
                     {
@@ -382,6 +383,9 @@ void MerkelMain::processUserOption(int userOption)
     }
 }
 
+
+//function definition for writeLogAssetsFunction 
+//adds data to logAssetsVector
 void MerkelMain::writeLogAssetsFunction()
 {
 
@@ -413,6 +417,8 @@ void MerkelMain::writeLogAssetsFunction()
     }
 }
 
+//function definition for writesuccessTradeFunction
+//adds data to allSuccessTradeVector
 void MerkelMain::writesuccessTradeFunction(std::string currentTime, std::string orderType, std::string orderStatement, std::string exchangeOffer)
 {
 
@@ -444,6 +450,8 @@ void MerkelMain::writesuccessTradeFunction(std::string currentTime, std::string 
     }
 }
 
+//function definition for writeallTradeLogFunction
+//adds data to allTradeLogVector
 void MerkelMain::writeallTradeLogFunction(std::string currentTime, std::string orderType, std::string orderStatement)
 {
 
