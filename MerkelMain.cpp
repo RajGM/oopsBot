@@ -8,7 +8,6 @@
 #include <typeinfo>
 #include <string>
 
-
 MerkelMain::MerkelMain()
 {
 }
@@ -80,7 +79,7 @@ void MerkelMain::printMarketStats()
 
 double MerkelMain::enterAsk(std::string inputUser)
 {
-   // std::cout << "Make an ask - enter the amount: product,price, amount, eg  ETH/BTC,200,0.5" << std::endl;
+    // std::cout << "Make an ask - enter the amount: product,price, amount, eg  ETH/BTC,200,0.5" << std::endl;
     std::string input;
 
     //if human input
@@ -113,13 +112,13 @@ double MerkelMain::enterAsk(std::string inputUser)
             double walletFullFillState = wallet.canFulfillOrder(obe);
             if (walletFullFillState)
             {
-             //   std::cout << "Wallet looks good. " << std::endl;
+                //   std::cout << "Wallet looks good. " << std::endl;
                 orderBook.insertOrder(obe);
                 return walletFullFillState;
             }
             else
             {
-              //  std::cout << "Wallet has insufficient funds . " << std::endl;
+                //  std::cout << "Wallet has insufficient funds . " << std::endl;
                 return 0.0;
             }
         }
@@ -165,7 +164,7 @@ double MerkelMain::enterBid(std::string inputUser)
             double walletFullFillState = wallet.canFulfillOrder(obe);
             if (walletFullFillState)
             {
-              //  std::cout << "Wallet looks good. " << std::endl;
+                //  std::cout << "Wallet looks good. " << std::endl;
                 orderBook.insertOrder(obe);
                 return walletFullFillState;
             }
@@ -190,15 +189,15 @@ void MerkelMain::printWallet()
 
 void MerkelMain::gotoNextTimeframe()
 {
-  //  std::cout << "Going to next time frame. " << std::endl;
+    //  std::cout << "Going to next time frame. " << std::endl;
     for (std::string p : orderBook.getKnownProducts())
     {
-       // std::cout << "matching " << p << std::endl;
+        // std::cout << "matching " << p << std::endl;
         std::vector<OrderBookEntry> sales = orderBook.matchAsksToBids(p, currentTime);
-      //  std::cout << "Sales: " << sales.size() << std::endl;
+        //  std::cout << "Sales: " << sales.size() << std::endl;
         for (OrderBookEntry &sale : sales)
         {
-          //  std::cout << "Sale price: " << sale.price << " amount " << sale.amount << std::endl;
+            //  std::cout << "Sale price: " << sale.price << " amount " << sale.amount << std::endl;
             if (sale.username == "simuser")
             {
                 // update the wallet
@@ -239,7 +238,7 @@ void MerkelMain::startBot()
         for (std::string const &p : orderBook.getKnownProducts())
         {
 
-           // std::cout << "Product: " << p << std::endl;
+            // std::cout << "Product: " << p << std::endl;
             std::string pairName = p;
 
             std::vector<OrderBookEntry> entries1 = orderBook.getOrders(OrderBookType::ask,
@@ -258,17 +257,14 @@ void MerkelMain::startBot()
         for (std::string const &p : orderBook.getKnownProducts())
         {
 
-           // std::cout << "Product: " << p << std::endl;
             std::string pairName = p;
 
             std::vector<OrderBookEntry> entries1 = orderBook.getOrders(OrderBookType::ask,
                                                                        p, currentTime);
             std::vector<OrderBookEntry> entries2 = orderBook.getOrders(OrderBookType::bid, p, currentTime);
 
-            //bot.trainBot(pairName,OrderBook::getHighPrice(entries1),OrderBook::getLowPrice(entries2));
             std::string botOrder = bot.checkIsOrder(pairName, OrderBook::getLowPrice(entries1), OrderBook::getHighPrice(entries2));
-           // std::cout << "botOrder:" << botOrder << std::endl;
-
+            
             if (botOrder == "buy")
             {
                 //first currency
@@ -277,158 +273,26 @@ void MerkelMain::startBot()
                 if (wallet.currenciesMap.find(first_token) != wallet.currenciesMap.end())
                 {
 
-                   // std::cout << "first_token Exists:" << first_token << std::endl;
                     std::string orderString = p + "," + std::to_string(OrderBook::getHighPrice(entries1)) + "," + std::to_string(wallet.currencyAmount(first_token) / 1000);
-                   // std::cout << "NEW BUY STRING:" << orderString << std::endl;
-                   // std::cout << "BUYING:" << first_token << " :::::" << std::endl;
                     double bidState = enterBid(orderString);
-                    //std::cout << "BIDSTATE CHECKING::::::" << bidState << std::endl;
-
+                    
                     if (bidState == -1.0)
                     {
-                     //   std::cout << "BAD INPUT" << std::endl;
+                        //   std::cout << "BAD INPUT" << std::endl;
                     }
                     else if (bidState)
                     {
-                      //  std::cout << "SUFFICIENT FUNDS in WALLET:" << bidState << " " << first_token << std::endl;
+                        writeLogAssetsFunction();
 
-                        //change into one function from
-                        logAssetObject.timeStamp = "";
-                        logAssetObject.allAssets = "";
+                        std::string exchangeAverage = first_token + ":" + std::to_string(bidState);
 
-                        logAssetObject.timeStamp = currentTime;
-                        for (const auto &myPair : wallet.currenciesMap)
-                        {
-                            std::string tempAssets = myPair.first + ":" + std::to_string(wallet.currencyAmount(myPair.first));
-                            logAssetObject.allAssets += "  " + tempAssets;
-                        }
+                        writesuccessTradeFunction(currentTime, "BID", orderString, exchangeAverage);
 
-                        if (logAssetsVector.size() != 0)
-                        {
-                            //check if prev is equal
-                            if (logAssetsVector[logAssetsVector.size() - 1].timeStamp == logAssetObject.timeStamp && logAssetsVector[logAssetsVector.size() - 1].allAssets == logAssetObject.allAssets)
-                            {
-                                //do not push
-                            }
-                            else
-                            {
-                                logAssetsVector.push_back(logAssetObject);
-                            }
-                        }
-                        else
-                        {
-                            logAssetsVector.push_back(logAssetObject);
-                        }
-                        //to here
-
-                        //convert function from here
-                        //do logging of success trades
-                        successTradeObject.timeStamp = "";
-                        successTradeObject.orderType = "";
-                        successTradeObject.orderStatement = "";
-                        successTradeObject.exchangeOffer = "";
-                        
-                        successTradeObject.timeStamp = currentTime;
-                        successTradeObject.orderType = "BID";
-                        successTradeObject.orderStatement = orderString;
-                        successTradeObject.exchangeOffer =  first_token +":"+std::to_string(bidState);
-                        
-
-                        if(allSuccessTradeVector.size()!=0){
-                            
-                            if( allSuccessTradeVector[allSuccessTradeVector.size()-1].timeStamp == successTradeObject.timeStamp 
-                            &&  allSuccessTradeVector[allSuccessTradeVector.size()-1].orderType == successTradeObject.orderType
-                            &&  allSuccessTradeVector[allSuccessTradeVector.size()-1].orderStatement ==  successTradeObject.orderStatement
-                            &&  allSuccessTradeVector[allSuccessTradeVector.size()-1].exchangeOffer == successTradeObject.exchangeOffer){
-                                //don't push
-                            }else{
-                                allSuccessTradeVector.push_back(successTradeObject);
-                            }
-
-
-                        }else{
-                            allSuccessTradeVector.push_back(successTradeObject);
-                        }
-                        //to here
-
-
-
-                        //change into function from
-                        askOfferObject.timeStamp = "";
-                        askOfferObject.orderType = "";
-                        askOfferObject.orderStatement = "";
-
-                        askOfferObject.timeStamp = currentTime;
-                        askOfferObject.orderType = "BID";
-                        askOfferObject.orderStatement = orderString;
-
-
-                        //allTradeLogVector
-                        if (allTradeLogVector.size() != 0)
-                        {
-
-                            if ( allTradeLogVector[allTradeLogVector.size()-1].timeStamp == askOfferObject.timeStamp 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderType == askOfferObject.orderType 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderStatement ==  askOfferObject.orderStatement)
-                            {
-                                //do not push
-                            }
-                            else
-                            {
-                                allTradeLogVector.push_back(askOfferObject);
-                            }
-                        }
-                        else
-                        {
-                            allTradeLogVector.push_back(askOfferObject);
-                        }
-
-                        //to here
-
-
-
-
-
+                        writeallTradeLogFunction(currentTime, "BID", orderString);
                     }
                     else
                     {
-                        std::cout << "INSUFFICIENT FUNDS" << std::endl;
-
-
-                        //change into function from
-                        askOfferObject.timeStamp = "";
-                        askOfferObject.orderType = "";
-                        askOfferObject.orderStatement = "";
-
-                        askOfferObject.timeStamp = currentTime;
-                        askOfferObject.orderType = "BID";
-                        askOfferObject.orderStatement = orderString;
-
-
-                        //allTradeLogVector
-                        if (allTradeLogVector.size() != 0)
-                        {
-
-                            if ( allTradeLogVector[allTradeLogVector.size()-1].timeStamp == askOfferObject.timeStamp 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderType == askOfferObject.orderType 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderStatement ==  askOfferObject.orderStatement)
-                            {
-                                //do not push
-                            }
-                            else
-                            {
-                                allTradeLogVector.push_back(askOfferObject);
-                            }
-                        }
-                        else
-                        {
-                            allTradeLogVector.push_back(askOfferObject);
-                        }
-
-                        //to here
-
-
-                        
+                        writeallTradeLogFunction(currentTime, "BID", orderString);
                     }
                 }
             }
@@ -444,157 +308,28 @@ void MerkelMain::startBot()
                 if (wallet.currenciesMap.find(first_token) != wallet.currenciesMap.end())
                 {
 
-                  //  std::cout << "first_token Exists:" << first_token << std::endl;
+                    
                     std::string orderString = p + "," + std::to_string(OrderBook::getLowPrice(entries2)) + "," + std::to_string(wallet.currencyAmount(first_token) / 1000);
-                   // std::cout << "NEW SELL STRING:" << orderString << std::endl;
-                   // std::cout << "SELLING:" << first_token << " :::::" << std::endl;
                     double askState = enterAsk(orderString);
-                    //std::cout << "ASKSTATE CHECKING::::::" << askState << std::endl;
-
+                    
                     if (askState == -1.0)
                     {
                         //std::cout << "BAD INPUT" << std::endl;
                     }
                     else if (askState)
                     {
-                       // std::cout << "SUFFICIENT FUNDS in WALLET:" << askState << " " << first_token << std::endl;
+                        writeLogAssetsFunction();
 
-                        //change into one function from
-                        logAssetObject.timeStamp = "";
-                        logAssetObject.allAssets = "";
+                        std::string exchangeAverage = first_token + ":" + std::to_string(askState);
 
-                        logAssetObject.timeStamp = currentTime;
-                        for (const auto &myPair : wallet.currenciesMap)
-                        {
-                            std::string tempAssets = myPair.first + ":" + std::to_string(wallet.currencyAmount(myPair.first));
-                            logAssetObject.allAssets += "  " + tempAssets;
-                        }
+                        writesuccessTradeFunction(currentTime, "ASK", orderString, exchangeAverage);
 
-                        if (logAssetsVector.size() != 0)
-                        {
-                            //check if prev is equal
-                            if (logAssetsVector[logAssetsVector.size() - 1].timeStamp == logAssetObject.timeStamp && logAssetsVector[logAssetsVector.size() - 1].allAssets == logAssetObject.allAssets)
-                            {
-                                //do not push
-                            }
-                            else
-                            {
-                                logAssetsVector.push_back(logAssetObject);
-                            }
-                        }
-                        else
-                        {
-                            logAssetsVector.push_back(logAssetObject);
-                        }
+                        writeallTradeLogFunction(currentTime, "ASK", orderString);
 
-                        //to here
-
-                        //do logging of success trades
-
-
-                        //convert function from here
-                        //do logging of success trades
-                        successTradeObject.timeStamp = "";
-                        successTradeObject.orderType = "";
-                        successTradeObject.orderStatement = "";
-                        successTradeObject.exchangeOffer = "";
-                        
-                        successTradeObject.timeStamp = currentTime;
-                        successTradeObject.orderType = "ASK";
-                        successTradeObject.orderStatement = orderString;
-                        successTradeObject.exchangeOffer =  first_token +":"+std::to_string(askState);
-                        
-
-                        if(allSuccessTradeVector.size()!=0){
-                            
-                            if( allSuccessTradeVector[allSuccessTradeVector.size()-1].timeStamp == successTradeObject.timeStamp 
-                            &&  allSuccessTradeVector[allSuccessTradeVector.size()-1].orderType == successTradeObject.orderType
-                            &&  allSuccessTradeVector[allSuccessTradeVector.size()-1].orderStatement ==  successTradeObject.orderStatement
-                            &&  allSuccessTradeVector[allSuccessTradeVector.size()-1].exchangeOffer == successTradeObject.exchangeOffer){
-                                //don't push
-                            }else{
-                                allSuccessTradeVector.push_back(successTradeObject);
-                            }
-
-
-                        }else{
-                            allSuccessTradeVector.push_back(successTradeObject);
-                        }
-                        //to here
-
-
-                        //change into function from
-                        askOfferObject.timeStamp = "";
-                        askOfferObject.orderType = "";
-                        askOfferObject.orderStatement = "";
-
-                        askOfferObject.timeStamp = currentTime;
-                        askOfferObject.orderType = "ASK";
-                        askOfferObject.orderStatement = orderString;
-
-
-                        //allTradeLogVector
-                        if (allTradeLogVector.size() != 0)
-                        {
-
-                            if ( allTradeLogVector[allTradeLogVector.size()-1].timeStamp == askOfferObject.timeStamp 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderType == askOfferObject.orderType 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderStatement ==  askOfferObject.orderStatement)
-                            {
-                                //do not push
-                            }
-                            else
-                            {
-                                allTradeLogVector.push_back(askOfferObject);
-                            }
-                        }
-                        else
-                        {
-                            allTradeLogVector.push_back(askOfferObject);
-                        }
-
-                        //to here
-
-                        
-
-                        
                     }
                     else
                     {
-                        std::cout << "INSUFFICIENT FUNDS" << std::endl;
-
-                        //change into function from
-                        askOfferObject.timeStamp = "";
-                        askOfferObject.orderType = "";
-                        askOfferObject.orderStatement = "";
-
-                        askOfferObject.timeStamp = currentTime;
-                        askOfferObject.orderType = "ASK";
-                        askOfferObject.orderStatement = orderString;
-
-
-                        //allTradeLogVector
-                        if (allTradeLogVector.size() != 0)
-                        {
-
-                            if ( allTradeLogVector[allTradeLogVector.size()-1].timeStamp == askOfferObject.timeStamp 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderType == askOfferObject.orderType 
-                            && allTradeLogVector[allTradeLogVector.size()-1].orderStatement ==  askOfferObject.orderStatement)
-                            {
-                                //do not push
-                            }
-                            else
-                            {
-                                allTradeLogVector.push_back(askOfferObject);
-                            }
-                        }
-                        else
-                        {
-                            allTradeLogVector.push_back(askOfferObject);
-                        }
-
-                        //to here
-
+                        writeallTradeLogFunction(currentTime, "ASK", orderString);  
                     }
                 }
             }
@@ -603,14 +338,11 @@ void MerkelMain::startBot()
         gotoNextTimeframe();
     }
 
-    
-
     //writing all to file
 
     loggerObject.writeLogAssets_toFile(logAssetsVector);
-    loggerObject.writeSuccessTrade_toFile( allSuccessTradeVector ); 
-    loggerObject.writeAskOfferLog_toFile( allTradeLogVector );
-    
+    loggerObject.writeSuccessTrade_toFile(allSuccessTradeVector);
+    loggerObject.writeAskOfferLog_toFile(allTradeLogVector);
 }
 
 void MerkelMain::processUserOption(int userOption)
@@ -647,5 +379,99 @@ void MerkelMain::processUserOption(int userOption)
     {
         //start the bot traing and then trading
         startBot();
+    }
+}
+
+void MerkelMain::writeLogAssetsFunction()
+{
+
+    logAssetObject.timeStamp = "";
+    logAssetObject.allAssets = "";
+
+    logAssetObject.timeStamp = currentTime;
+    for (const auto &myPair : wallet.currenciesMap)
+    {
+        std::string tempAssets = myPair.first + ":" + std::to_string(wallet.currencyAmount(myPair.first));
+        logAssetObject.allAssets += "  " + tempAssets;
+    }
+
+    if (logAssetsVector.size() != 0)
+    {
+        //check if prev is equal
+        if (logAssetsVector[logAssetsVector.size() - 1].timeStamp == logAssetObject.timeStamp && logAssetsVector[logAssetsVector.size() - 1].allAssets == logAssetObject.allAssets)
+        {
+            //do not push
+        }
+        else
+        {
+            logAssetsVector.push_back(logAssetObject);
+        }
+    }
+    else
+    {
+        logAssetsVector.push_back(logAssetObject);
+    }
+}
+
+void MerkelMain::writesuccessTradeFunction(std::string currentTime, std::string orderType, std::string orderStatement, std::string exchangeOffer)
+{
+
+    successTradeObject.timeStamp = "";
+    successTradeObject.orderType = "";
+    successTradeObject.orderStatement = "";
+    successTradeObject.exchangeOffer = "";
+
+    successTradeObject.timeStamp = currentTime;
+    successTradeObject.orderType = orderType;
+    successTradeObject.orderStatement = orderStatement;
+    successTradeObject.exchangeOffer = exchangeOffer;
+
+    if (allSuccessTradeVector.size() != 0)
+    {
+
+        if (allSuccessTradeVector[allSuccessTradeVector.size() - 1].timeStamp == successTradeObject.timeStamp && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderType == successTradeObject.orderType && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderStatement == successTradeObject.orderStatement && allSuccessTradeVector[allSuccessTradeVector.size() - 1].exchangeOffer == successTradeObject.exchangeOffer)
+        {
+            //do not push
+        }
+        else
+        {
+            allSuccessTradeVector.push_back(successTradeObject);
+        }
+    }
+    else
+    {
+        allSuccessTradeVector.push_back(successTradeObject);
+    }
+}
+
+void MerkelMain::writeallTradeLogFunction(std::string currentTime, std::string orderType, std::string orderStatement)
+{
+
+    askOfferObject.timeStamp = "";
+    askOfferObject.orderType = "";
+    askOfferObject.orderStatement = "";
+
+    askOfferObject.timeStamp = currentTime;
+    askOfferObject.orderType = orderType;
+    askOfferObject.orderStatement = orderStatement;
+
+    //allTradeLogVector
+    if (allTradeLogVector.size() != 0)
+    {
+
+        if (allTradeLogVector[allTradeLogVector.size() - 1].timeStamp == askOfferObject.timeStamp 
+        && allTradeLogVector[allTradeLogVector.size() - 1].orderType == askOfferObject.orderType 
+        && allTradeLogVector[allTradeLogVector.size() - 1].orderStatement == askOfferObject.orderStatement)
+        {
+            //do not push
+        }
+        else
+        {
+            allTradeLogVector.push_back(askOfferObject);
+        }
+    }
+    else
+    {
+        allTradeLogVector.push_back(askOfferObject);
     }
 }

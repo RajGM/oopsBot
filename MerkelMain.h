@@ -42,6 +42,10 @@ private:
 
     Logger loggerObject;
 
+    void writeLogAssetsFunction();
+    void writesuccessTradeFunction(std::string currentTime, std::string orderType, std::string orderStatement, std::string exchangeOffer);
+    void writeallTradeLogFunction(std::string currentTime, std::string orderType, std::string orderStatement);
+
     //        OrderBook orderBook{"20200317.csv"};
     OrderBook orderBook{"20200601.csv"};
     Wallet wallet;
