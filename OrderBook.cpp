@@ -12,6 +12,7 @@
 OrderBook::OrderBook(std::string filename)
 {
     orders = CSVReader::readCSV(filename);
+    ordersMap = CSVReader::readCSVMap(filename);
 }
 
 /** return vector of all know products in the dataset*/
@@ -35,21 +36,24 @@ std::vector<std::string> OrderBook::getKnownProducts()
     return products;
 }
 /** return vector of Orders according to the sent filters*/
+
+//efficiency fixed
 std::vector<OrderBookEntry> OrderBook::getOrders(OrderBookType type, 
                                         std::string product, 
                                         std::string timestamp)
 {
-    std::vector<OrderBookEntry> orders_sub;
-    for (OrderBookEntry& e : orders)
-    {
-        if (e.orderType == type && 
-            e.product == product && 
-            e.timestamp == timestamp )
-            {
-                orders_sub.push_back(e);
-            }
-    }
-    return orders_sub;
+
+    std::vector<OrderBookEntry> Efficientorders_sub;
+
+    for (auto& x: ordersMap[timestamp]) {
+        
+        if( x.orderType == type && x.product == product && x.timestamp == timestamp ){
+            Efficientorders_sub.push_back(x);
+        }
+        
+     }
+
+    return Efficientorders_sub;
 }
 
 
@@ -62,7 +66,6 @@ double OrderBook::getHighPrice(std::vector<OrderBookEntry>& orders)
     }
     return max;
 }
-
 
 double OrderBook::getLowPrice(std::vector<OrderBookEntry>& orders)
 {
@@ -81,16 +84,22 @@ std::string OrderBook::getEarliestTime()
 
 std::vector<OrderBookEntry> OrderBook::getLiveOrder(std::string currentTime){
     
-    std::vector<OrderBookEntry> currentTimeLiveOrders;
-    for(int i=0;i<orders.size();i++){
-        //timestamp passed is equal then push
-        //if()
-    }
-    return orders;
+    std::vector<OrderBookEntry> currentTimeLiveOrders = ordersMap[currentTime];
+
+    return currentTimeLiveOrders;
+
 } 
 
 std::string OrderBook::getNextTime(std::string timestamp)
 {
+
+    std::map<std::string,std::vector<OrderBookEntry> >::iterator it;
+    it = ordersMap.find(timestamp);
+    it++;
+    
+    return it->first;
+
+    /*
     std::string next_timestamp = "";
     for (OrderBookEntry& e : orders)
     {
@@ -105,12 +114,17 @@ std::string OrderBook::getNextTime(std::string timestamp)
         next_timestamp = orders[0].timestamp;
     }
     return next_timestamp;
+    */
+
 }
 
 void OrderBook::insertOrder(OrderBookEntry& order)
-{
-    orders.push_back(order);
-    std::sort(orders.begin(), orders.end(), OrderBookEntry::compareByTimestamp);
+{   
+    std::vector<OrderBookEntry> orderVector = ordersMap[order.timestamp];
+    orderVector.push_back(order);
+    ordersMap[order.timestamp] = orderVector;
+    //orders.push_back(order);
+    //std::sort(orders.begin(), orders.end(), OrderBookEntry::compareByTimestamp);
 }
 
 std::vector<OrderBookEntry> OrderBook::matchAsksToBids(std::string product, std::string timestamp)

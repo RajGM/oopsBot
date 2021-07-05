@@ -1,5 +1,5 @@
 //C++ File for CSVReader
-//StarterCode file 
+//StarterCode file
 //No need to change anything here
 
 #include "CSVReader.h"
@@ -8,7 +8,6 @@
 
 CSVReader::CSVReader()
 {
-
 }
 
 std::vector<OrderBookEntry> CSVReader::readCSV(std::string csvFilename)
@@ -19,38 +18,94 @@ std::vector<OrderBookEntry> CSVReader::readCSV(std::string csvFilename)
     std::string line;
     if (csvFile.is_open())
     {
-        while(std::getline(csvFile, line))
+        while (std::getline(csvFile, line))
         {
-            try {
+            try
+            {
                 OrderBookEntry obe = stringsToOBE(tokenise(line, ','));
                 entries.push_back(obe);
-            }catch(const std::exception& e)
-            {
-                std::cout << "CSVReader::readCSV bad data"  << std::endl;
             }
-        }// end of while
-    }    
+            catch (const std::exception &e)
+            {
+                std::cout << "CSVReader::readCSV bad data" << std::endl;
+            }
+        } // end of while
+    }
 
-    std::cout << "CSVReader::readCSV read " << entries.size() << " entries"  << std::endl;
-    return entries; 
+    csvFile.close();
+
+    std::cout << "CSVReader::readCSV read " << entries.size() << " entries" << std::endl;
+    return entries;
+}
+
+std::map<std::string, std::vector<OrderBookEntry>> CSVReader::readCSVMap(std::string csvFilename)
+{
+
+    std::map<std::string, std::vector<OrderBookEntry>> mapOrders;
+    std::map<std::string, std::vector<OrderBookEntry>>::iterator it;
+
+    std::ifstream csvFile{csvFilename};
+    std::string line;
+    if (csvFile.is_open())
+    {
+        while (std::getline(csvFile, line))
+        {
+            try
+            {
+                OrderBookEntry obe = stringsToOBE(tokenise(line, ','));
+               // std::cout<<"OBE VALUES:"<<obe.timestamp<<" "<<obe.amount<<" "<<obe.price<<" "<<obe.product<<" "<<obe.username<<std::endl;
+                std::vector<OrderBookEntry> newVectorTest;
+                //std::cout<<"Vecotor DONE \n";
+                newVectorTest.push_back(obe);
+               // std::cout<<"Vecotor PUSING DONE  \n";
+
+                it = mapOrders.find(obe.timestamp);
+                if (it != mapOrders.end())
+                {
+                    std::vector<OrderBookEntry> newVector = mapOrders[obe.timestamp];
+                    newVector.push_back(obe);
+                    mapOrders[obe.timestamp] = newVector;
+                }
+                else
+                {
+                    std::string newTimeStamp = obe.timestamp;
+                    mapOrders[newTimeStamp] = newVectorTest;
+                }
+
+            }
+            catch (const std::exception &e)
+            {
+                std::cout << "CSVReader::readCSV bad data" << std::endl;
+            }
+        } // end of while
+    }
+
+    csvFile.close();
+
+    std::cout << "Total TimeStamps:" << mapOrders.size() << std::endl;
+    return mapOrders;
 }
 
 std::vector<std::string> CSVReader::tokenise(std::string csvLine, char separator)
 {
-   std::vector<std::string> tokens;
-   signed int start, end;
-   std::string token;
+    std::vector<std::string> tokens;
+    signed int start, end;
+    std::string token;
     start = csvLine.find_first_not_of(separator, 0);
-    do{
+    do
+    {
         end = csvLine.find_first_of(separator, start);
-        if (start == csvLine.length() || start == end) break;
-        if (end >= 0) token = csvLine.substr(start, end - start);
-        else token = csvLine.substr(start, csvLine.length() - start);
+        if (start == csvLine.length() || start == end)
+            break;
+        if (end >= 0)
+            token = csvLine.substr(start, end - start);
+        else
+            token = csvLine.substr(start, csvLine.length() - start);
         tokens.push_back(token);
-    start = end + 1;
-    }while(end > 0);
+        start = end + 1;
+    } while (end > 0);
 
-   return tokens; 
+    return tokens;
 }
 
 OrderBookEntry CSVReader::stringsToOBE(std::vector<std::string> tokens)
@@ -63,46 +118,50 @@ OrderBookEntry CSVReader::stringsToOBE(std::vector<std::string> tokens)
         throw std::exception{};
     }
     // we have 5 tokens
-    try {
-         price = std::stod(tokens[3]);
-         amount = std::stod(tokens[4]);
-    }catch(const std::exception& e){
-        std::cout << "CSVReader::stringsToOBE Bad float! " << tokens[3]<< std::endl;
-        std::cout << "CSVReader::stringsToOBE Bad float! " << tokens[4]<< std::endl; 
-        throw;        
+    try
+    {
+        price = std::stod(tokens[3]);
+        amount = std::stod(tokens[4]);
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "CSVReader::stringsToOBE Bad float! " << tokens[3] << std::endl;
+        std::cout << "CSVReader::stringsToOBE Bad float! " << tokens[4] << std::endl;
+        throw;
     }
 
-    OrderBookEntry obe{price, 
-                        amount, 
-                        tokens[0],
-                        tokens[1], 
-                        OrderBookEntry::stringToOrderBookType(tokens[2])};
+    OrderBookEntry obe{price,
+                       amount,
+                       tokens[0],
+                       tokens[1],
+                       OrderBookEntry::stringToOrderBookType(tokens[2])};
 
-    return obe; 
-}
-
-
-OrderBookEntry CSVReader::stringsToOBE(std::string priceString, 
-                                    std::string amountString, 
-                                    std::string timestamp, 
-                                    std::string product, 
-                                    OrderBookType orderType)
-{
-    double price, amount;
-    try {
-         price = std::stod(priceString);
-         amount = std::stod(amountString);
-    }catch(const std::exception& e){
-        std::cout << "CSVReader::stringsToOBE Bad float! " << priceString<< std::endl;
-        std::cout << "CSVReader::stringsToOBE Bad float! " << amountString<< std::endl; 
-        throw;        
-    }
-    OrderBookEntry obe{price, 
-                    amount, 
-                    timestamp,
-                    product, 
-                    orderType};
-                
     return obe;
 }
-     
+
+OrderBookEntry CSVReader::stringsToOBE(std::string priceString,
+                                       std::string amountString,
+                                       std::string timestamp,
+                                       std::string product,
+                                       OrderBookType orderType)
+{
+    double price, amount;
+    try
+    {
+        price = std::stod(priceString);
+        amount = std::stod(amountString);
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "CSVReader::stringsToOBE Bad float! " << priceString << std::endl;
+        std::cout << "CSVReader::stringsToOBE Bad float! " << amountString << std::endl;
+        throw;
+    }
+    OrderBookEntry obe{price,
+                       amount,
+                       timestamp,
+                       product,
+                       orderType};
+
+    return obe;
+}

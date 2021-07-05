@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include <iostream>
 #include "OrderBookEntry.h"
 #include <vector>
 #include <string>
+#include <map>
 
 
 class CSVReader
@@ -21,6 +23,8 @@ class CSVReader
                                         std::string timestamp, 
                                         std::string product, 
                                         OrderBookType OrderBookType);
+
+     static std::map<std::string, std::vector<OrderBookEntry> > readCSVMap(std::string csvFile);
 
     private:
      static OrderBookEntry stringsToOBE(std::vector<std::string> strings);

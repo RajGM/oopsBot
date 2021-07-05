@@ -35,10 +35,12 @@ class OrderBook
         static double getHighPrice(std::vector<OrderBookEntry>& orders);
         static double getLowPrice(std::vector<OrderBookEntry>& orders);
 
+        //used to return live orders of current time from Merklerex exchange  
         std::vector<OrderBookEntry> getLiveOrder(std::string currentTime);
-
+        
+        
     private:
         std::vector<OrderBookEntry> orders;
-
+        std::map<std::string, std::vector<OrderBookEntry> > ordersMap;
 
 };

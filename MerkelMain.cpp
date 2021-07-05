@@ -435,7 +435,10 @@ void MerkelMain::writesuccessTradeFunction(std::string currentTime, std::string 
     if (allSuccessTradeVector.size() != 0)
     {
 
-        if (allSuccessTradeVector[allSuccessTradeVector.size() - 1].timeStamp == successTradeObject.timeStamp && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderType == successTradeObject.orderType && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderStatement == successTradeObject.orderStatement && allSuccessTradeVector[allSuccessTradeVector.size() - 1].exchangeOffer == successTradeObject.exchangeOffer)
+        if (allSuccessTradeVector[allSuccessTradeVector.size() - 1].timeStamp == successTradeObject.timeStamp 
+        && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderType == successTradeObject.orderType 
+        && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderStatement == successTradeObject.orderStatement 
+        && allSuccessTradeVector[allSuccessTradeVector.size() - 1].exchangeOffer == successTradeObject.exchangeOffer)
         {
             //do not push
         }
