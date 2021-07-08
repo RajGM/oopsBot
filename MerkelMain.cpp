@@ -1,6 +1,7 @@
 #include "MerkelMain.h"
 #include <iostream>
 #include <vector>
+#include <chrono>
 #include "OrderBookEntry.h"
 #include "CSVReader.h"
 #include "Bot.h"
@@ -16,7 +17,7 @@ void MerkelMain::init()
 {
     int input;
     currentTime = orderBook.getEarliestTime();
-
+    totalTimeStamp = orderBook.returnOrderBookSize();
     wallet.insertCurrency("ETH", 10);
     wallet.insertCurrency("BTC", 10);
     wallet.insertCurrency("DOGE", 1000);
@@ -60,7 +61,7 @@ void MerkelMain::printHelp()
 void MerkelMain::printMarketStats()
 {
 
-    for (std::string const &p : orderBook.getKnownProducts())
+    for (std::string const &p : orderBook.getKnownProducts(currentTime))
     {
         std::cout << "Product: " << p << std::endl;
         std::vector<OrderBookEntry> entries = orderBook.getOrders(OrderBookType::ask,
@@ -170,7 +171,7 @@ double MerkelMain::enterBid(std::string inputUser)
             }
             else
             {
-                std::cout << "Wallet has insufficient funds . " << std::endl;
+                //std::cout << "Wallet has insufficient funds . " << std::endl;
                 return 0.0;
             }
         }
@@ -190,7 +191,7 @@ void MerkelMain::printWallet()
 void MerkelMain::gotoNextTimeframe()
 {
     //  std::cout << "Going to next time frame. " << std::endl;
-    for (std::string p : orderBook.getKnownProducts())
+    for (std::string p : orderBook.getKnownProducts(currentTime))
     {
         // std::cout << "matching " << p << std::endl;
         std::vector<OrderBookEntry> sales = orderBook.matchAsksToBids(p, currentTime);
@@ -231,11 +232,11 @@ void MerkelMain::startBot()
 {
     Bot bot;
     bot.botInit();
-    
+    int trainingPeriod = 10;
     //bot training for the first 6 time frames
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < trainingPeriod; i++)
     {
-        for (std::string const &p : orderBook.getKnownProducts())
+        for (std::string const &p : orderBook.getKnownProducts(currentTime))
         {
 
             // std::cout << "Product: " << p << std::endl;
@@ -252,9 +253,9 @@ void MerkelMain::startBot()
     }
 
     //bot trading for the rest of the time frames
-    for (int i = 0; i < 10; i++)
+    for (int i = trainingPeriod; i < totalTimeStamp; i++)
     {
-        for (std::string const &p : orderBook.getKnownProducts())
+        for (std::string const &p : orderBook.getKnownProducts(currentTime))
         {
 
             std::string pairName = p;
@@ -379,7 +380,11 @@ void MerkelMain::processUserOption(int userOption)
     else if (userOption == 7)
     {
         //start the bot traing and then trading
+        auto start = std::chrono::high_resolution_clock::now();
         startBot();
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        std::cout << "Duration in microSeconds:" <<duration.count() << std::endl;
     }
 }
 

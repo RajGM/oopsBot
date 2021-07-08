@@ -31,9 +31,13 @@ void Bot::botInit()
 void Bot::trainBot(std::string pair, double buyPrice,double sellPrice){
 
     double currentTimePeriodAverage = (buyPrice + sellPrice)/2;
-    int timePeriod = elaspedPeriod + 1;
-    double currentAverage = ( movingAverageMap.find(pair)->second + currentTimePeriodAverage )/timePeriod;
-    movingAverageMap.at(pair) = currentAverage; 
+    double currentAverage = ( movingAverageMap.find(pair)->second + currentTimePeriodAverage )/2;
+    
+    if( movingAverageMap.find(pair)->second == 0){
+        movingAverageMap.at(pair) = currentTimePeriodAverage; 
+    }else{
+        movingAverageMap.at(pair) = currentAverage; 
+    }
 
 }
 
@@ -44,8 +48,7 @@ std::string Bot::checkIsOrder(std::string pair, double buyPrice,double sellPrice
 
     double strategyMA =  movingAverageMap.find(pair)->second;
     double currentTimePeriodAverage = (buyPrice + sellPrice)/2;
-    int timePeriod = elaspedPeriod + 1;
-    double currentAverage = ( movingAverageMap.find(pair)->second + currentTimePeriodAverage )/timePeriod;
+    double currentAverage = ( strategyMA + currentTimePeriodAverage )/2;
 
     movingAverageMap.at(pair) = currentAverage; 
 

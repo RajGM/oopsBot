@@ -63,4 +63,6 @@ private:
     //OrderBook orderBook{"20200317.csv"};
     OrderBook orderBook{"20200601.csv"};
     Wallet wallet;
+
+    int totalTimeStamp;
 };

@@ -14,7 +14,7 @@ class OrderBook
     /** construct, reading a csv data file */
         OrderBook(std::string filename);
     /** return vector of all know products in the dataset*/
-        std::vector<std::string> getKnownProducts();
+        std::vector<std::string> getKnownProducts(std::string currentTime);
     /** return vector of Orders according to the sent filters*/
         std::vector<OrderBookEntry> getOrders(OrderBookType type, 
                                               std::string product, 
@@ -37,10 +37,13 @@ class OrderBook
 
         //used to return live orders of current time from Merklerex exchange  
         std::vector<OrderBookEntry> getLiveOrder(std::string currentTime);
+
+        //used to get count of total entries of timestamp 
+        int returnOrderBookSize();
         
         
     private:
-        std::vector<OrderBookEntry> orders;
+        //std::vector<OrderBookEntry> orders;
         std::map<std::string, std::vector<OrderBookEntry> > ordersMap;
 
 };

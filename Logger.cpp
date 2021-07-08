@@ -13,7 +13,7 @@ void Logger::writeLogAssets_toFile(std::vector<LogAssets> logAssetsVector)
     std::ofstream myfile;
 
     myfile.open("logAssets.txt");
-
+    myfile << "========TIMESTAMP=========" << "      " << " ========WALLET HOLDING======== " << "\n";
     for (int i = 0; i < logAssetsVector.size(); i++)
     {
         myfile << logAssetsVector[i].timeStamp << "    " << logAssetsVector[i].allAssets << "\n";
@@ -29,7 +29,7 @@ void Logger::writeSuccessTrade_toFile(std::vector<SuccessTrade> allSuccessTradeV
     std::ofstream myfile;
 
     myfile.open("allSuccessTrades.txt");
-
+    myfile << "========TIMESTAMP=========" << "   " << "TYPE:" << "    " << "===ORDER INFORMATION===" << "    " << "EXCHANGE AVERAGE OFFERING" << "\n";
     for (int i = 0; i < allSuccessTradeVector.size(); i++)
     {
         myfile << allSuccessTradeVector[i].timeStamp << "    " << allSuccessTradeVector[i].orderType << "    " << allSuccessTradeVector[i].orderStatement << "    " << allSuccessTradeVector[i].exchangeOffer << "\n";
@@ -46,7 +46,7 @@ void Logger::writeAskOfferLog_toFile(std::vector<AskOfferLog> allTradeLogVector)
     std::ofstream myfile;
 
     myfile.open("allTradeLog.txt");
-    
+    myfile << "========TIMESTAMP=========" << "   " << "TYPE:" << "    " << "===ORDER INFORMATION==="<< "\n";
     for (int i = 0; i < allTradeLogVector.size(); i++)
     {
         myfile << allTradeLogVector[i].timeStamp << "    " << allTradeLogVector[i].orderType << "    " << allTradeLogVector[i].orderStatement << "    "

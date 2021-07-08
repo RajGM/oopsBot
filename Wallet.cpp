@@ -83,7 +83,7 @@ double Wallet::canFulfillOrder(OrderBookEntry order)
     {
         double amount = order.amount;
         std::string currency = currs[0];
-        std::cout << "Wallet::canFulfillOrder " << currency << " : " << amount << std::endl;
+        //std::cout << "Wallet::canFulfillOrder " << currency << " : " << amount << std::endl;
 
         if( containsCurrency(currency, amount) ){
             return amount;
@@ -97,7 +97,7 @@ double Wallet::canFulfillOrder(OrderBookEntry order)
     {
         double amount = order.amount * order.price;
         std::string currency = currs[1];
-        std::cout << "Wallet::canFulfillOrder " << currency << " : " << amount << std::endl;
+        //std::cout << "Wallet::canFulfillOrder " << currency << " : " << amount << std::endl;
         
         if( containsCurrency(currency, amount) ){
             return amount;
