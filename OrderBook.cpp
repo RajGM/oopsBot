@@ -95,8 +95,14 @@ std::string OrderBook::getNextTime(std::string timestamp)
 
     std::map<std::string,std::vector<OrderBookEntry> >::iterator it;
     it = ordersMap.find(timestamp);
-    it++;
     
+    if(it == ordersMap.end()){
+        it = ordersMap.begin();
+        std::cout<<"======================THIS IS THE LAST ELEMENT==========================="<<std::endl;
+    }else{
+        it++;
+    }
+
     return it->first;
 
     /*
@@ -154,10 +160,12 @@ std::vector<OrderBookEntry> OrderBook::matchAsksToBids(std::string product, std:
     // sort bids highest first
     std::sort(bids.begin(), bids.end(), OrderBookEntry::compareByPriceDesc);
     // for ask in asks:
-    std::cout << "max ask " << asks[asks.size()-1].price << std::endl;
-    std::cout << "min ask " << asks[0].price << std::endl;
-    std::cout << "max bid " << bids[0].price << std::endl;
-    std::cout << "min bid " << bids[bids.size()-1].price << std::endl;
+    
+    //commented out for testing purposes
+    //std::cout << "max ask " << asks[asks.size()-1].price << std::endl;
+    //std::cout << "min ask " << asks[0].price << std::endl;
+    //std::cout << "max bid " << bids[0].price << std::endl;
+    //std::cout << "min bid " << bids[bids.size()-1].price << std::endl;
     
     for (OrderBookEntry& ask : asks)
     {
