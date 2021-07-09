@@ -9,6 +9,8 @@
 #include <typeinfo>
 #include <string>
 
+#include <stdlib.h>
+
 MerkelMain::MerkelMain()
 {
 }
@@ -255,6 +257,9 @@ void MerkelMain::startBot()
     //bot trading for the rest of the time frames
     for (int i = trainingPeriod; i < totalTimeStamp; i++)
     {
+        //tempOrders vector to hold info about temporary orders
+        TempOrder tempOrderObject;
+        std::vector<TempOrder> temporderVector;
         for (std::string const &p : orderBook.getKnownProducts(currentTime))
         {
 
@@ -265,7 +270,7 @@ void MerkelMain::startBot()
             std::vector<OrderBookEntry> entries2 = orderBook.getOrders(OrderBookType::bid, p, currentTime);
 
             std::string botOrder = bot.checkIsOrder(pairName, OrderBook::getLowPrice(entries1), OrderBook::getHighPrice(entries2));
-            
+
             //if bot predicts to buy
             if (botOrder == "buy")
             {
@@ -276,20 +281,27 @@ void MerkelMain::startBot()
 
                     std::string orderString = p + "," + std::to_string(OrderBook::getHighPrice(entries1)) + "," + std::to_string(wallet.currencyAmount(first_token) / 1000);
                     double bidState = enterBid(orderString);
-                    
+
                     if (bidState == -1.0)
                     {
                         //   bad input
                     }
                     else if (bidState)
                     {
-                        writeLogAssetsFunction();
-
+                        //set flag here
+                        //push to temporders
+                        
                         std::string exchangeAverage = first_token + ":" + std::to_string(bidState);
 
-                        writesuccessTradeFunction(currentTime, "BID", orderString, exchangeAverage);
+                        tempOrderObject.timeStamp = currentTime;
+                        tempOrderObject.orderType = "BID";
+                        tempOrderObject.orderStatement = orderString;
+                        tempOrderObject.exchangeOffer = exchangeAverage;
+                        tempOrderObject.pairName = pairName;
+                        tempOrderObject.highPrice = OrderBook::getHighPrice(entries1);
+                        tempOrderObject.lowPrice = OrderBook::getLowPrice(entries1);
+                        temporderVector.push_back(tempOrderObject);
 
-                        writeallTradeLogFunction(currentTime, "BID", orderString);
                     }
                     else
                     {
@@ -310,32 +322,44 @@ void MerkelMain::startBot()
                 if (wallet.currenciesMap.find(first_token) != wallet.currenciesMap.end())
                 {
 
-                    
                     std::string orderString = p + "," + std::to_string(OrderBook::getLowPrice(entries2)) + "," + std::to_string(wallet.currencyAmount(first_token) / 1000);
                     double askState = enterAsk(orderString);
-                    
+
                     if (askState == -1.0)
                     {
-                        //bad input 
+                        //bad input
                     }
                     else if (askState)
                     {
-                        writeLogAssetsFunction();
+                        //push to temp orders
 
                         std::string exchangeAverage = first_token + ":" + std::to_string(askState);
 
-                        writesuccessTradeFunction(currentTime, "ASK", orderString, exchangeAverage);
-
-                        writeallTradeLogFunction(currentTime, "ASK", orderString);
+                        tempOrderObject.timeStamp = currentTime;
+                        tempOrderObject.orderType = "ASK";
+                        tempOrderObject.orderStatement = orderString;
+                        tempOrderObject.exchangeOffer = exchangeAverage;
+                        tempOrderObject.pairName = pairName;
+                        tempOrderObject.highPrice = OrderBook::getHighPrice(entries1);
+                        tempOrderObject.lowPrice = OrderBook::getLowPrice(entries1);
+                        temporderVector.push_back(tempOrderObject);
 
                     }
                     else
                     {
-                        writeallTradeLogFunction(currentTime, "ASK", orderString);  
+                        writeallTradeLogFunction(currentTime, "ASK", orderString);
                     }
                 }
             }
         }
+
+        writeLogAssetsFunction();
+
+        //revoke order
+        revokeOrder(temporderVector);
+        
+        //to here
+
         bot.elaspedPeriod += 1;
         gotoNextTimeframe();
     }
@@ -384,12 +408,11 @@ void MerkelMain::processUserOption(int userOption)
         startBot();
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        std::cout << "Duration in microSeconds:" <<duration.count() << std::endl;
+        std::cout << "Duration in microSeconds:" << duration.count() << std::endl;
     }
 }
 
-
-//function definition for writeLogAssetsFunction 
+//function definition for writeLogAssetsFunction
 //adds data to logAssetsVector
 void MerkelMain::writeLogAssetsFunction()
 {
@@ -440,10 +463,7 @@ void MerkelMain::writesuccessTradeFunction(std::string currentTime, std::string 
     if (allSuccessTradeVector.size() != 0)
     {
 
-        if (allSuccessTradeVector[allSuccessTradeVector.size() - 1].timeStamp == successTradeObject.timeStamp 
-        && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderType == successTradeObject.orderType 
-        && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderStatement == successTradeObject.orderStatement 
-        && allSuccessTradeVector[allSuccessTradeVector.size() - 1].exchangeOffer == successTradeObject.exchangeOffer)
+        if (allSuccessTradeVector[allSuccessTradeVector.size() - 1].timeStamp == successTradeObject.timeStamp && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderType == successTradeObject.orderType && allSuccessTradeVector[allSuccessTradeVector.size() - 1].orderStatement == successTradeObject.orderStatement && allSuccessTradeVector[allSuccessTradeVector.size() - 1].exchangeOffer == successTradeObject.exchangeOffer)
         {
             //do not push
         }
@@ -475,9 +495,7 @@ void MerkelMain::writeallTradeLogFunction(std::string currentTime, std::string o
     if (allTradeLogVector.size() != 0)
     {
 
-        if (allTradeLogVector[allTradeLogVector.size() - 1].timeStamp == askOfferObject.timeStamp 
-        && allTradeLogVector[allTradeLogVector.size() - 1].orderType == askOfferObject.orderType 
-        && allTradeLogVector[allTradeLogVector.size() - 1].orderStatement == askOfferObject.orderStatement)
+        if (allTradeLogVector[allTradeLogVector.size() - 1].timeStamp == askOfferObject.timeStamp && allTradeLogVector[allTradeLogVector.size() - 1].orderType == askOfferObject.orderType && allTradeLogVector[allTradeLogVector.size() - 1].orderStatement == askOfferObject.orderStatement)
         {
             //do not push
         }
@@ -490,4 +508,34 @@ void MerkelMain::writeallTradeLogFunction(std::string currentTime, std::string o
     {
         allTradeLogVector.push_back(askOfferObject);
     }
+}
+
+void MerkelMain::revokeOrder(std::vector<TempOrder> temporderVector){
+    for (int i = 0; i < temporderVector.size(); i++)
+        {
+        
+            //withdrawing selling and buying is been randomized so that we be on safer side in terms of trading
+            int randomNumber = rand() % 10 + 1;
+
+            if (randomNumber % 2 == 0 && randomNumber % 3 == 0)
+            {
+                writeallTradeLogFunction(currentTime, temporderVector[i].orderType, temporderVector[i].orderStatement);
+                std::vector<std::string> tokensRem = CSVReader::tokenise(temporderVector[i].orderStatement, ',');
+
+                OrderBookEntry obeRemove = CSVReader::stringsToOBE(
+                    tokensRem[1],
+                    tokensRem[2],
+                    currentTime,
+                    tokensRem[0],
+                    OrderBookType::bid);
+                obeRemove.username = "simuser";
+
+                orderBook.removeOrder(obeRemove);
+            }
+            else
+            {
+                writesuccessTradeFunction(currentTime, temporderVector[i].orderType, temporderVector[i].orderStatement, temporderVector[i].exchangeOffer);
+                writeallTradeLogFunction(currentTime, temporderVector[i].orderType, temporderVector[i].orderStatement);
+            }
+        }
 }

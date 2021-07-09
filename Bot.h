@@ -26,6 +26,8 @@ public:
     //check wheather it is time to buy or sell according to the strategy build using traing bot and saved into movingAverageMap
     std::string checkIsOrder(std::string pair, double buyPrice, double sellPrice);
 
+    //check wheather it is time to buy or sell but don't update
+    std::string checkIsOrderNoupdate(std::string pair, double buyPrice,double sellPrice);
 private:
 
     //movingAverageMap used to store trading strategy values for each pair

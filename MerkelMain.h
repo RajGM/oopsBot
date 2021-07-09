@@ -9,6 +9,7 @@
 #include "AskOfferLog.h"
 #include "SuccessTrade.h"
 #include "Logger.h"
+#include "TempOrder.h"
 
 class MerkelMain
 {
@@ -59,6 +60,8 @@ private:
     void writeLogAssetsFunction();
     void writesuccessTradeFunction(std::string currentTime, std::string orderType, std::string orderStatement, std::string exchangeOffer);
     void writeallTradeLogFunction(std::string currentTime, std::string orderType, std::string orderStatement);
+
+    void revokeOrder(std::vector<TempOrder> temporderVector);
 
     //OrderBook orderBook{"20200317.csv"};
     OrderBook orderBook{"20200601.csv"};

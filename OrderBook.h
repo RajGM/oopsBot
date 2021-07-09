@@ -41,7 +41,8 @@ class OrderBook
         //used to get count of total entries of timestamp 
         int returnOrderBookSize();
         
-        
+        //remove orders from orderBook
+        void removeOrder(OrderBookEntry& order);
     private:
         //std::vector<OrderBookEntry> orders;
         std::map<std::string, std::vector<OrderBookEntry> > ordersMap;

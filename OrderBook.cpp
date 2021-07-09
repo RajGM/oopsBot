@@ -116,6 +116,25 @@ void OrderBook::insertOrder(OrderBookEntry &order)
     ordersMap[order.timestamp] = orderVector;
 }
 
+ void OrderBook::removeOrder(OrderBookEntry& order){
+    std::vector<OrderBookEntry> orderVector = ordersMap[order.timestamp];
+    
+    for(int i=0;i<orderVector.size();i++){
+        if( orderVector[i].timestamp == order.timestamp
+        && orderVector[i].orderType == order.orderType 
+        && orderVector[i].product == order.product 
+        && orderVector[i].amount == order.amount 
+        && orderVector[i].username == order.username
+        && orderVector[i].price == order.price 
+        ){
+            orderVector.erase(orderVector.begin()+i);
+            break;
+        }
+    }
+
+    ordersMap[order.timestamp] = orderVector;
+ }
+
 std::vector<OrderBookEntry> OrderBook::matchAsksToBids(std::string product, std::string timestamp)
 {
     // asks = orderbook.asks

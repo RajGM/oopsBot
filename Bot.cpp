@@ -61,3 +61,19 @@ std::string Bot::checkIsOrder(std::string pair, double buyPrice,double sellPrice
     return "noorder";
 
 }
+
+std::string Bot::checkIsOrderNoupdate(std::string pair, double buyPrice,double sellPrice){
+
+    double strategyMA =  movingAverageMap.find(pair)->second;
+    double currentTimePeriodAverage = (buyPrice + sellPrice)/2;
+    
+    if(strategyMA >= currentTimePeriodAverage){
+        return "buy";
+    }else{
+        return "sell";
+    }
+
+    return "noorder";
+
+
+}
